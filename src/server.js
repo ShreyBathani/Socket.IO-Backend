@@ -11,19 +11,40 @@ const { chatRoomsHandler } = require('./examples/chatRooms');
 const app = express();
 const httpServer = createServer(app);
 
+// Dynamic CORS configuration based on environment
+const getAllowedOrigins = () => {
+  const origins = [
+    process.env.CLIENT_URL_LOCAL || 'http://localhost:3000',
+    process.env.CLIENT_URL_PRODUCTION,
+  ].filter(Boolean); // Remove undefined values
+
+  console.log('✅ Allowed CORS Origins:', origins);
+  return origins;
+};
+
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: getAllowedOrigins(),
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
-app.use(cors());
+// Express CORS configuration
+app.use(cors({
+  origin: getAllowedOrigins(),
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Health check route
 app.get('/', (req, res) => {
-  res.json({ message: 'Socket.IO Backend Running' });
+  res.json({ 
+    message: 'Socket.IO Backend Running',
+    environment: process.env.NODE_ENV || 'development',
+    allowedOrigins: getAllowedOrigins()
+  });
 });
 
 // Initialize Examples
@@ -33,4 +54,6 @@ chatRoomsHandler(io);
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`✅ CORS enabled for: ${getAllowedOrigins().join(', ')}`);
 });
