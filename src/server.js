@@ -7,6 +7,7 @@ require('dotenv').config();
 // Import examples
 const { clickCounterHandler } = require('./examples/clickCounter');
 const { chatRoomsHandler } = require('./examples/chatRooms');
+const { salesDashboardHandler } = require('./examples/salesDashboard');
 
 const app = express();
 const httpServer = createServer(app);
@@ -27,7 +28,11 @@ const io = new Server(httpServer, {
     origin: getAllowedOrigins(),
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 // Express CORS configuration
@@ -50,6 +55,7 @@ app.get('/', (req, res) => {
 // Initialize Examples
 clickCounterHandler(io);
 chatRoomsHandler(io);
+salesDashboardHandler(io);
 
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
