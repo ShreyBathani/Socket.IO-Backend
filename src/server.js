@@ -23,16 +23,16 @@ const getAllowedOrigins = () => {
   return origins;
 };
 
-const io = new Server(httpServer, {
-  cors: {
-    origin: getAllowedOrigins(),
-    methods: ["GET", "POST"],
-    credentials: true
+const io = new Server(httpServer, { // initialize Socket.IO server with existing HTTP server
+  cors: { // CORS settings
+    origin: getAllowedOrigins(), // allow only specific domains returned by this function
+    methods: ["GET", "POST"], // allow only GET and POST requests during handshake
+    credentials: true // allow cookies / auth headers in cross-origin requests
   },
-  transports: ['websocket', 'polling'],
-  allowEIO3: true,
-  pingTimeout: 60000,
-  pingInterval: 25000
+  transports: ['websocket', 'polling'], // allowed transports: websocket first, fallback to polling
+  allowEIO3: true, // allow older Socket.IO v2 (Engine.IO v3) clients to connect
+  pingTimeout: 60000, // disconnect client if no pong within 60 seconds
+  pingInterval: 25000 // send ping to client every 25 seconds to check connection
 });
 
 // Express CORS configuration
