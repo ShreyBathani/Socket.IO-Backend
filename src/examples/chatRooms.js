@@ -15,7 +15,7 @@ const chatRoomsHandler = (io) => {
     });
     
     // Handle room join
-    socket.on('joinRoom', (room) => {
+    socket.on('joinRoom', (room, username) => {
       if (ROOMS.includes(room)) {
         // Leave all previous rooms
         socket.rooms.forEach(r => {
@@ -33,7 +33,7 @@ const chatRoomsHandler = (io) => {
         
         // Notify others in the room
         socket.to(room).emit('userJoined', {
-          message: `User ${socket.id.slice(0, 5)} joined ${room}`,
+          message: `${username}(${socket.id}) joined ${room}`,
           room: room
         });
       }
@@ -58,12 +58,12 @@ const chatRoomsHandler = (io) => {
     });
     
     // Handle leave room
-    socket.on('leaveRoom', (room) => {
+    socket.on('leaveRoom', (room, username) => {
       socket.leave(room);
       console.log(`❌ ${socket.id} left room: ${room}`);
       
       socket.to(room).emit('userLeft', {
-        message: `User ${socket.id.slice(0, 5)} left ${room}`,
+        message: `${username}(${socket.id}) left ${room}`,
         room: room
       });
       
